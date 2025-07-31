@@ -1,0 +1,1034 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        
+    function deleteNotification(requestId) {
+      if (!dismissedNotifications.includes(requestId)) {
+        dismissedNotifications.push(requestId);
+        localStorage.setItem('dismissedNotifications', JSON.stringify(dismissedNotifications));
+        renderNotifications();
+      }
+    }
+
+    function markAllNotificationsAsRead() {
+      const allRequestIds = requests
+        .filter(r => r.assignee_id === currentUser.id && r.status !== 'Tamamlandı')
+        .map(r => r.id);
+      dismissedNotifications = [...new Set([...dismissedNotifications, ...allRequestIds])];
+      localStorage.setItem('dismissedNotifications', JSON.stringify(dismissedNotifications));
+      renderNotifications();
+    }
+
+    function clearAllNotifications() {
+      dismissedNotifications = requests
+        .filter(r => r.assignee_id === currentUser.id && r.status !== 'Tamamlandı')
+        .map(r => r.id);
+      localStorage.setItem('dismissedNotifications', JSON.stringify(dismissedNotifications));
+      renderNotifications();
+    }
+
+
+function changePassword() {
+  const currentPass = document.getElementById('current-password').value;
+  const newPass = document.getElementById('new-password').value;
+  const confirmPass = document.getElementById('confirm-password').value;
+
+  if (currentPass !== currentUser.password) {
+    alert('Mevcut şifre hatalı!');
+    return;
+  }
+  if (newPass !== confirmPass) {
+    alert('Yeni şifreler eşleşmiyor!');
+    return;
+  }
+  if (newPass.length < 4) {
+    alert('Yeni şifre en az 4 karakter olmalı.');
+    return;
+  }
+
+  currentUser.password = newPass;
+  saveData();
+  alert('Şifreniz başarıyla güncellendi.');
+  document.getElementById('current-password').value = '';
+  document.getElementById('new-password').value = '';
+  document.getElementById('confirm-password').value = '';
+}
+
+</script><!DOCTYPE html>
+
+<html lang="tr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Stil Cephe Yönetim Uygulaması</title>
+<script src="https://cdn.tailwindcss.com">
+    function deleteNotification(requestId) {
+      if (!dismissedNotifications.includes(requestId)) {
+        dismissedNotifications.push(requestId);
+        localStorage.setItem('dismissedNotifications', JSON.stringify(dismissedNotifications));
+        renderNotifications();
+      }
+    }
+
+    function markAllNotificationsAsRead() {
+      const allRequestIds = requests
+        .filter(r => r.assignee_id === currentUser.id && r.status !== 'Tamamlandı')
+        .map(r => r.id);
+      dismissedNotifications = [...new Set([...dismissedNotifications, ...allRequestIds])];
+      localStorage.setItem('dismissedNotifications', JSON.stringify(dismissedNotifications));
+      renderNotifications();
+    }
+
+    function clearAllNotifications() {
+      dismissedNotifications = requests
+        .filter(r => r.assignee_id === currentUser.id && r.status !== 'Tamamlandı')
+        .map(r => r.id);
+      localStorage.setItem('dismissedNotifications', JSON.stringify(dismissedNotifications));
+      renderNotifications();
+    }
+
+
+function changePassword() {
+  const currentPass = document.getElementById('current-password').value;
+  const newPass = document.getElementById('new-password').value;
+  const confirmPass = document.getElementById('confirm-password').value;
+
+  if (currentPass !== currentUser.password) {
+    alert('Mevcut şifre hatalı!');
+    return;
+  }
+  if (newPass !== confirmPass) {
+    alert('Yeni şifreler eşleşmiyor!');
+    return;
+  }
+  if (newPass.length < 4) {
+    alert('Yeni şifre en az 4 karakter olmalı.');
+    return;
+  }
+
+  currentUser.password = newPass;
+  saveData();
+  alert('Şifreniz başarıyla güncellendi.');
+  document.getElementById('current-password').value = '';
+  document.getElementById('new-password').value = '';
+  document.getElementById('confirm-password').value = '';
+}
+
+</script>
+<style>
+    body {
+      background: linear-gradient(135deg, #4b5563, #f97316);
+      position: relative;
+      overflow-x: hidden;
+      color: #4b5563;
+    }
+    .background-text {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-45deg);
+      font-size: 10rem;
+      color: rgba(255, 255, 255, 0.1);
+      font-weight: bold;
+      z-index: -1;
+      user-select: none;
+    }
+    .clock {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #1f2937;
+      font-size: 1.2rem;
+      font-weight: bold;
+      z-index: 10;
+    }
+    .notification {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #10b981;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      z-index: 20;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+    }
+    .notification.show {
+      display: block;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+<div class="background-text">Stil Cephe</div>
+<div class="clock" id="current-time"></div>
+<div class="notification" id="notification">Talep oluşturuldu!</div>
+<div class="flex h-screen" id="app">
+<!-- Giriş Ekranı -->
+<div class="flex items-center justify-center w-full h-screen" id="login-screen">
+<div class="bg-white p-8 rounded-lg shadow-xl w-96 transform transition-all hover:scale-105">
+<h2 class="text-2xl font-bold mb-6 text-center text-orange-600">Stil Cephe Giriş</h2>
+<div class="text-center mb-4 text-black" id="login-time"></div>
+<input class="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-gray-700" id="username" placeholder="Kullanıcı Adı" type="text"/>
+<input class="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-gray-700" id="password" placeholder="Şifre" type="password"/>
+<button class="w-full bg-orange-600 text-white p-3 rounded-lg hover:bg-orange-700 transition font-semibold" onclick="handleLogin()">
+          Giriş
+        </button>
+<a class="text-orange-600 text-sm mt-2 block text-center" href="#" onclick="showForgotPassword()">Şifremi Unuttum</a>
+</div>
+</div>
+<!-- Şifre Sıfırlama Ekranı -->
+<div class="hidden flex items-center justify-center w-full h-screen" id="forgot-password-screen">
+<div class="bg-white p-8 rounded-lg shadow-xl w-96 transform transition-all hover:scale-105">
+<h2 class="text-2xl font-bold mb-6 text-center text-orange-600">Şifre Sıfırlama</h2>
+<input class="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-gray-700" id="forgot-username" placeholder="Kullanıcı Adı" type="text"/>
+<button class="w-full bg-orange-600 text-white p-3 rounded-lg hover:bg-orange-700 transition font-semibold" onclick="resetPassword()">
+          Şifre Sıfırla
+        </button>
+<a class="text-orange-600 text-sm mt-2 block text-center" href="#" onclick="hideForgotPassword()">Geri Dön</a>
+</div>
+</div>
+<!-- Yönetim Paneli -->
+<div class="hidden flex w-full h-screen" id="dashboard">
+<!-- Sol Menü -->
+<div class="w-64 bg-white shadow-lg">
+<h2 class="text-xl font-bold p-4 border-b text-orange-600">Modüller</h2>
+<ul id="module-list"></ul>
+<li class="p-4 cursor-pointer hover:bg-orange-100 transition text-orange-600 flex justify-between items-center" id="add-module-item">
+<span>Yeni Birim Ekle</span>
+<button class="text-green-600 hover:text-green-800" onclick="addModule()">+</button>
+</li>
+<li class="p-4 cursor-pointer hover:bg-orange-100 transition text-orange-600" id="profile-item" onclick="showProfile()">
+          Kişisel Bilgilerim
+        </li>
+</div>
+<!-- Ana İçerik -->
+<div class="flex-1 p-8 overflow-auto">
+<div class="flex justify-between items-center mb-6">
+<h1 class="text-3xl font-bold text-orange-600" id="dashboard-title"></h1>
+<button class="bg-red-600 text-white p-3 rounded-lg hover:bg-red-700 transition font-semibold" onclick="handleLogout()">
+            Çıkış Yap
+          </button>
+</div>
+<!-- Admin Paneli -->
+<div class="bg-white p-6 rounded-lg shadow-md mb-8 hidden" id="admin-panel">
+<h2 class="text-xl font-bold mb-4 text-orange-600">Kullanıcı Yönetimi</h2>
+<div class="flex flex-wrap gap-4 mb-4">
+<input class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-gray-700" id="new-username" placeholder="Kullanıcı Adı" type="text"/>
+<input class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-gray-700" id="new-password" placeholder="Şifre" type="password"/>
+<input class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-gray-700" id="new-position" placeholder="Görev Tanımı (ör. Muhasebe Sorumlusu)" type="text"/>
+<select class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-gray-700" id="new-user-dept">
+<option value="Yonetim">Yönetim</option>
+<option value="Finans">Finans</option>
+<option value="InsanKaynaklari">İnsan Kaynakları</option>
+<option value="ProjeOfisi">Proje Ofisi</option>
+<option value="Otomasyon">Otomasyon</option>
+<option value="Depo">Depo</option>
+</select>
+<select class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-gray-700" id="new-user-role">
+<option value="user">Kullanıcı</option>
+<option value="manager">Yönetici</option>
+<option value="admin">Admin</option>
+</select>
+<button class="bg-orange-600 text-white p-3 rounded-lg hover:bg-orange-700 transition font-semibold" onclick="addUser()">
+              Kaydet
+            </button>
+</div>
+<div class="mb-4">
+<h3 class="text-lg font-semibold text-orange-600">Yetkiler</h3>
+<div id="permissions-form"></div>
+</div>
+<h3 class="text-lg font-semibold mb-2 text-orange-600">Kullanıcılar</h3>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="user-list"></div>
+</div>
+<!-- Kişisel Bilgiler Sayfası -->
+<div class="bg-white p-6 rounded-lg shadow-md mb-8 hidden" id="profile-screen">
+<h2 class="text-xl font-bold mb-4 text-orange-600">Kişisel Bilgilerim</h2>
+<div class="flex flex-wrap gap-4 mb-4">
+<input class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-gray-700" id="profile-email" placeholder="E-posta" type="email" value=""/>
+<input class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-gray-700" id="profile-firstname" placeholder="Ad" type="text" value=""/>
+<input class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-gray-700" id="profile-lastname" placeholder="Soyad" type="text" value=""/>
+<input class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-gray-700" id="profile-age" placeholder="Yaş" type="number" value=""/>
+<input class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-gray-700" id="profile-birthdate" type="date" value=""/>
+<button class="bg-orange-600 text-white p-3 rounded-lg hover:bg-orange-700 transition font-semibold" onclick="saveProfile()">
+              Kaydet
+            </button>
+<div class="w-full mt-6">
+<h3 class="text-lg font-semibold mb-2 text-orange-600">Şifre Değiştir</h3>
+<input class="w-full p-3 mb-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-gray-700" id="current-password" placeholder="Eski Şifre" type="password"/>
+<input class="w-full p-3 mb-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-gray-700" id="new-password" placeholder="Yeni Şifre" type="password"/>
+<input class="w-full p-3 mb-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-gray-700" id="confirm-password" placeholder="Yeni Şifre (Tekrar)" type="password"/>
+<button class="w-full bg-orange-600 text-white p-3 rounded-lg hover:bg-orange-700 transition font-semibold" onclick="changePassword()">Şifreyi Güncelle</button>
+</div>
+
+</div>
+</div>
+<div class="bg-white p-6 rounded-lg shadow-md mb-8" id="module-content">
+<h2 class="text-xl font-bold mb-4 text-orange-600" id="module-title"></h2>
+<div id="module-permissions"></div>
+<div class="mb-4" id="file-upload"></div>
+<h3 class="text-lg font-semibold mb-2 text-orange-600">Dosyalar</h3>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="file-list"></div>
+</div>
+<div class="bg-white p-6 rounded-lg shadow-md mb-8">
+<h2 class="text-xl font-bold mb-4 text-orange-600">Talepler</h2>
+<div class="mb-4">
+<input class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition mr-2 text-gray-700" id="request-title" placeholder="Talep Başlığı" type="text"/>
+<textarea class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition w-full mb-2 text-gray-700" id="request-description" placeholder="Talep Açıklaması"></textarea>
+<select class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition mr-2 text-gray-700" id="request-assignee">
+<option value="">Kime Adresleniyor</option>
+</select>
+<select class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition mr-2 text-gray-700" id="request-priority">
+<option value="Yüksek">Yüksek</option>
+<option value="Orta">Orta</option>
+<option value="Düşük">Düşük</option>
+</select>
+<input class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition mr-2 text-gray-700" id="request-deadline" placeholder="Son Tarih (YYYY-AA-GG)" type="date"/>
+<button class="bg-orange-600 text-white p-3 rounded-lg hover:bg-orange-700 transition font-semibold" onclick="handleRequest()">
+              Talep Oluştur
+            </button>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="request-list"></div>
+</div>
+<div class="bg-white p-6 rounded-lg shadow-md mb-8">
+<h2 class="text-xl font-bold mb-4 text-orange-600">Bekleyen Talepler</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="pending-requests"></div>
+</div>
+<div class="bg-white p-6 rounded-lg shadow-md">
+<h2 class="text-xl font-bold mb-4 text-orange-600">Bildirimler</h2>
+<div class="mb-4 flex gap-4">
+<button class="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 transition" onclick="markAllNotificationsAsRead()">Tümünü Okundu Yap</button>
+<button class="bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700 transition" onclick="clearAllNotifications()">Tümünü Temizle</button>
+</div>
+<div class="space-y-2 max-h-96 overflow-y-auto" id="notification-list"></div>
+</div>
+</div>
+</div>
+<div class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" id="preview-modal">
+<div class="bg-white p-4 rounded-lg max-w-3xl w-full">
+<div class="flex justify-between mb-4">
+<h3 class="text-lg font-semibold text-orange-600">Dosya Önizleme</h3>
+<button class="text-red-600 hover:text-red-800" onclick="closePreview()">Kapat</button>
+</div>
+<div id="preview-content"></div>
+</div>
+</div>
+</div>
+<script>
+    let modules = ['Yonetim', 'Finans', 'InsanKaynaklari', 'ProjeOfisi', 'Otomasyon', 'Depo'];
+    let currentUser = null;
+    let users = [
+      { id: 1, username: 'admin', password: '12345', role: 'admin', department: 'Yönetim', position: 'Genel Müdür', permissions: modules.map(m => ({ module: m, permissions: ['view', 'edit', 'upload'] })), email: '', firstname: '', lastname: '', age: '', birthdate: '' },
+      { id: 2, username: 'user1', password: '12345', role: 'user', department: 'Finans', position: 'Muhasebe Sorumlusu', permissions: [{ module: 'Finans', permissions: ['view'] }], email: '', firstname: '', lastname: '', age: '', birthdate: '' },
+      { id: 3, username: 'user2', password: '12345', role: 'manager', department: 'İnsan Kaynakları', position: 'İK Yöneticisi', permissions: [{ module: 'InsanKaynaklari', permissions: ['view', 'edit', 'upload'] }], email: '', firstname: '', lastname: '', age: '', birthdate: '' },
+    ];
+    let requests = [];
+    let deadlines = [];
+let dismissedNotifications = JSON.parse(localStorage.getItem('dismissedNotifications') || '[]');
+    let files = [];
+
+    function updateClock() {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const dateString = now.toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' });
+      document.getElementById('current-time').textContent = `${dateString} - ${timeString}`;
+      document.getElementById('login-time').textContent = `Güncel Tarih ve Saat: ${dateString} ${timeString}`;
+      checkDailyTasks();
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function saveData() {
+      localStorage.setItem('users', JSON.stringify(users));
+      localStorage.setItem('requests', JSON.stringify(requests));
+      localStorage.setItem('files', JSON.stringify(files));
+      localStorage.setItem('deadlines', JSON.stringify(deadlines));
+      localStorage.setItem('modules', JSON.stringify(modules));
+    }
+
+    function loadData() {
+      const savedUsers = localStorage.getItem('users');
+      const savedRequests = localStorage.getItem('requests');
+      const savedFiles = localStorage.getItem('files');
+      const savedDeadlines = localStorage.getItem('deadlines');
+      const savedDismissed = localStorage.getItem('dismissedNotifications');
+      if (savedDismissed) dismissedNotifications = JSON.parse(savedDismissed);
+      const savedModules = localStorage.getItem('modules');
+      if (savedUsers) users = JSON.parse(savedUsers);
+      if (savedRequests) {
+      requests = JSON.parse(savedRequests).map(r => ({
+        ...r,
+        deadline: new Date(r.deadline),
+        created_at: new Date(r.created_at)
+      }));
+    }
+      if (savedFiles) files = JSON.parse(savedFiles);
+      if (savedDeadlines) deadlines = JSON.parse(savedDeadlines).map(d => ({ ...d, due_date: new Date(d.due_date) }));
+      if (savedModules) modules = JSON.parse(savedModules);
+    }
+
+    function handleLogin() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const user = users.find(u => u.username === username && u.password === password);
+      if (user) {
+        currentUser = user;
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        document.getElementById('dashboard-title').textContent = `Stil Cephe Yönetim Paneli - ${user.department} (${user.position})`;
+        if (user.role === 'admin') document.getElementById('admin-panel').classList.remove('hidden');
+        renderModuleList();
+        renderModuleContent('Yonetim');
+        renderRequests();
+        renderPendingRequests();
+        renderNotifications();
+        renderAssigneeOptions();
+      } else {
+        alert('Geçersiz kimlik bilgileri');
+      }
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      document.getElementById('login-screen').classList.remove('hidden');
+      document.getElementById('dashboard').classList.add('hidden');
+      document.getElementById('admin-panel').classList.add('hidden');
+      document.getElementById('profile-screen').classList.add('hidden');
+    }
+
+    function renderModuleList() {
+      const moduleList = document.getElementById('module-list');
+      moduleList.innerHTML = '';
+      modules.forEach((module, index) => {
+        const hasAccess = currentUser.permissions.some(p => p.module === module);
+        if (hasAccess) {
+          const li = document.createElement('li');
+          li.className = 'p-4 cursor-pointer hover:bg-orange-100 transition text-orange-600 flex justify-between items-center';
+          li.textContent = module.replace('InsanKaynaklari', 'İnsan Kaynakları').replace('ProjeOfisi', 'Proje Ofisi');
+          if (currentUser.role === 'admin') {
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = '-';
+            deleteButton.className = 'text-red-600 hover:text-red-800';
+            deleteButton.onclick = () => deleteModule(index);
+            li.appendChild(deleteButton);
+          }
+          li.onclick = () => renderModuleContent(module);
+          moduleList.appendChild(li);
+        }
+      });
+    }
+
+    function renderModuleContent(module) {
+      const moduleTitle = document.getElementById('module-title');
+      const modulePermissions = document.getElementById('module-permissions');
+      const fileUpload = document.getElementById('file-upload');
+      const fileList = document.getElementById('file-list');
+      moduleTitle.textContent = module.replace('InsanKaynaklari', 'İnsan Kaynakları').replace('ProjeOfisi', 'Proje Ofisi');
+      const permissions = currentUser.permissions.find(p => p.module === module)?.permissions || [];
+      modulePermissions.textContent = permissions.length ? `Yetkiler: ${permissions.join(', ')}` : 'Bu modüle erişim yetkiniz yok.';
+      fileUpload.innerHTML = '';
+      if (permissions.includes('upload')) {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.xlsx,.xls,.pdf,.jpg,.jpeg,.png';
+        input.className = 'p-2 border rounded-lg';
+        input.onchange = (e) => handleFileUpload(e, module);
+        fileUpload.appendChild(input);
+      }
+      fileList.innerHTML = '';
+      files.filter(f => f.module === module && permissions.includes('view')).forEach(f => {
+        const div = document.createElement('div');
+        div.className = 'bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition';
+        div.innerHTML = `
+          <p class="font-medium text-orange-600">${f.file_name}</p>
+          <p class="text-sm text-gray-600">Yükleme: ${new Date(f.uploaded_at).toLocaleString()}</p>
+          <p class="text-sm text-gray-600">Yükleyen: ${users.find(u => u.id === f.user_id)?.username || 'Bilinmeyen'}</p>
+          <div class="mt-2 flex gap-2">
+            ${f.file_type.startsWith('image/') || f.file_type === 'application/pdf' ? `<button onclick="previewFile('${f.id}')" class="bg-orange-600 text-white px-3 py-1 rounded-lg hover:bg-orange-700 transition">Görüntüle</button>` : ''}
+            <a href="${f.file_path}" download="${f.file_name}" class="bg-orange-600 text-white px-3 py-1 rounded-lg hover:bg-orange-700 transition">İndir</a>
+          </div>
+        `;
+        fileList.appendChild(div);
+      });
+    }
+
+    function handleFileUpload(e, module) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          files.push({
+            id: files.length + 1,
+            user_id: currentUser.id,
+            module,
+            file_path: event.target.result,
+            file_name: file.name,
+            file_type: file.type,
+            uploaded_at: new Date(),
+          });
+          saveData();
+          renderModuleContent(module);
+          alert('Dosya yüklendi! Ağ klasörüne manuel olarak kopyalayın: \\\\server\\paylasim\\');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function previewFile(fileId) {
+      const file = files.find(f => f.id == fileId);
+      const previewModal = document.getElementById('preview-modal');
+      const previewContent = document.getElementById('preview-content');
+      previewContent.innerHTML = file.file_type === 'application/pdf'
+        ? `<iframe src="${file.file_path}" class="w-full h-96"></iframe>`
+        : `<img src="${file.file_path}" class="w-full max-h-96 object-contain" alt="Preview">`;
+      previewModal.classList.remove('hidden');
+    }
+
+    function closePreview() {
+      document.getElementById('preview-modal').classList.add('hidden');
+    }
+
+    function addUser() {
+      const username = document.getElementById('new-username').value;
+      const password = document.getElementById('new-password').value;
+      const position = document.getElementById('new-position').value;
+      const department = document.getElementById('new-user-dept').value;
+      const role = document.getElementById('new-user-role').value;
+      const permissions = [];
+      modules.forEach(module => {
+        const view = document.getElementById(`perm-${module}-view`)?.checked;
+        const edit = document.getElementById(`perm-${module}-edit`)?.checked;
+        const upload = document.getElementById(`perm-${module}-upload`)?.checked;
+        const perms = [];
+        if (view) perms.push('view');
+        if (edit) perms.push('edit');
+        if (upload) perms.push('upload');
+        if (perms.length) permissions.push({ module, permissions: perms });
+      });
+      if (username && password && position) {
+        users.push({
+          id: users.length + 1,
+          username,
+          password,
+          role,
+          department,
+          position,
+          permissions,
+          email: '',
+          firstname: '',
+          lastname: '',
+          age: '',
+          birthdate: ''
+        });
+        saveData();
+        renderUsers();
+        renderAssigneeOptions();
+        alert('Kullanıcı kaydedildi!');
+      } else {
+        alert('Kullanıcı adı, şifre ve görev tanımı gerekli!');
+      }
+    }
+
+    function renderUsers() {
+      const userList = document.getElementById('user-list');
+      const permissionsForm = document.getElementById('permissions-form');
+      userList.innerHTML = '';
+      permissionsForm.innerHTML = '';
+      modules.forEach(module => {
+        const div = document.createElement('div');
+        div.className = 'mb-2';
+        div.innerHTML = `
+          <label class="font-medium text-orange-600">${module.replace('InsanKaynaklari', 'İnsan Kaynakları').replace('ProjeOfisi', 'Proje Ofisi')}</label>
+          <div class="flex gap-4">
+            <label class="flex items-center">
+              <input type="checkbox" id="perm-${module}-view" class="mr-2"> Görüntüleme
+            </label>
+            <label class="flex items-center">
+              <input type="checkbox" id="perm-${module}-edit" class="mr-2"> Düzenleme
+            </label>
+            <label class="flex items-center">
+              <input type="checkbox" id="perm-${module}-upload" class="mr-2"> Dosya Yükleme
+            </label>
+          </div>
+        `;
+        permissionsForm.appendChild(div);
+      });
+      users.forEach(u => {
+        const div = document.createElement('div');
+        div.className = 'bg-white p-3 rounded-lg shadow-sm flex justify-between items-center';
+        div.innerHTML = `
+          <span class="text-gray-700">${u.username} - ${u.department} (${u.position}, ${u.role})</span>
+          <button onclick="deleteUser(${u.id})" class="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition">Sil</button>
+        `;
+        userList.appendChild(div);
+      });
+    }
+
+    function addModule() {
+      const newModule = prompt('Yeni Birim Adı (ör. Satış)');
+      if (newModule && !modules.includes(newModule)) {
+        modules.push(newModule);
+        if (currentUser.role === 'admin') {
+          users.forEach(user => {
+            if (user.role === 'admin') {
+              user.permissions.push({ module: newModule, permissions: ['view', 'edit', 'upload'] });
+            }
+          });
+        }
+        saveData();
+        renderModuleList();
+        renderUsers();
+        alert('Yeni birim eklendi: ' + newModule);
+      } else {
+        alert('Birim adı geçersiz veya zaten mevcut!');
+      }
+    }
+
+    function deleteModule(index) {
+      if (currentUser.role === 'admin') {
+        const moduleToDelete = modules[index];
+        if (confirm(`"${moduleToDelete}" birimini silmek istediğinizden emin misiniz?`)) {
+          modules.splice(index, 1);
+          users.forEach(user => {
+            user.permissions = user.permissions.filter(p => p.module !== moduleToDelete);
+          });
+          files = files.filter(f => f.module !== moduleToDelete);
+          requests = requests.filter(r => {
+            const isRelated = r.assignee_id === currentUser.id || r.creator_id === currentUser.id || currentUser.role === 'admin';
+            return !isRelated || !r.title.includes(moduleToDelete);
+          });
+          saveData();
+          renderModuleList();
+          renderModuleContent(modules[0] || '');
+          renderRequests();
+          renderUsers();
+        }
+      }
+    }
+
+    function deleteUser(userId) {
+      users = users.filter(u => u.id !== userId);
+      files = files.filter(f => f.user_id !== userId);
+      requests = requests.filter(r => r.assignee_id !== userId);
+      saveData();
+      renderUsers();
+      renderAssigneeOptions();
+      renderModuleContent(modules[0]);
+      renderRequests();
+    }
+
+    function renderAssigneeOptions() {
+      const assigneeSelect = document.getElementById('request-assignee');
+      assigneeSelect.innerHTML = '<option value="">Kime Adresleniyor</option>';
+      users.forEach(user => {
+        const option = document.createElement('option');
+        option.value = user.id;
+        option.textContent = `${user.username} (${user.position})`;
+        assigneeSelect.appendChild(option);
+      });
+    }
+
+    function handleRequest() {
+      const title = document.getElementById('request-title').value;
+      const description = document.getElementById('request-description').value;
+      const assigneeId = parseInt(document.getElementById('request-assignee').value);
+      const priority = document.getElementById('request-priority').value;
+      const deadline = document.getElementById('request-deadline').value;
+      if (title && description && assigneeId && deadline) {
+        const deadlineDate = new Date(deadline);
+        requests.push({
+          id: requests.length + 1,
+          title,
+          description,
+          status: 'Yapılmadı',
+          priority,
+          assignee_id: assigneeId,
+          creator_id: currentUser.id,
+          created_at: new Date(),
+          deadline: deadlineDate,
+        });
+        deadlines.push({
+          id: deadlines.length + 1,
+          task: title,
+          due_date: deadlineDate,
+          assignee_id: assigneeId,
+        });
+        saveData();
+        renderRequests();
+        renderPendingRequests();
+        renderNotifications();
+        showNotification();
+        document.getElementById('request-title').value = '';
+        document.getElementById('request-description').value = '';
+        document.getElementById('request-assignee').value = '';
+        document.getElementById('request-priority').value = 'Yüksek';
+        document.getElementById('request-deadline').value = '';
+      } else {
+        alert('Başlık, açıklama, atanan kişi ve son tarih gerekli!');
+      }
+    }
+
+    function showNotification() {
+      const notification = document.getElementById('notification');
+      notification.classList.add('show');
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+    }
+
+    function renderRequests() {
+      const requestList = document.getElementById('request-list');
+      requestList.innerHTML = '';
+      const priorityOrder = { 'Yüksek': 1, 'Orta': 2, 'Düşük': 3 };
+      const statusColors = {
+        'Tamamlandı': 'bg-green-100 text-green-800',
+        'Yapılmadı': 'bg-red-100 text-red-800',
+        'Çalışılıyor': 'bg-yellow-100 text-yellow-800',
+      };
+      requests
+        .filter(r => r.assignee_id === currentUser.id || r.creator_id === currentUser.id || currentUser.role === 'admin')
+        .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
+        .filter(r => !dismissedNotifications.includes(r.id))
+        .forEach(r => {
+          const div = document.createElement('div');
+          div.className = `p-4 rounded-lg shadow-sm ${statusColors[r.status] || 'bg-gray-50'}`;
+          div.innerHTML = `
+            <p class="font-medium text-orange-600">${r.title}</p>
+            <p class="text-sm">Açıklama: ${r.description}</p>
+            <p class="text-sm">Öncelik: ${r.priority}</p>
+            <p class="text-sm">Atanan: ${users.find(u => u.id === r.assignee_id)?.username || 'Bilinmeyen'}</p>
+            <p class="text-sm">Son Tarih: ${r.deadline.toLocaleDateString('tr-TR')}</p>
+            <p class="text-sm">Oluşturan: ${users.find(u => u.id === r.creator_id)?.username || 'Bilinmeyen'}</p>
+            <p class="text-sm">Oluşturma: ${new Date(r.created_at).toLocaleString()}</p>
+            <div class="mt-2 flex gap-2">
+              ${(currentUser.id === r.assignee_id || currentUser.role === 'admin') ? `
+  <select onchange="updateRequestStatus(${r.id}, this.value)" class="p-2 border rounded-lg">
+    <option value="Yapılmadı" ${r.status === 'Yapılmadı' ? 'selected' : ''}>Yapılmadı</option>
+    <option value="Çalışılıyor" ${r.status === 'Çalışılıyor' ? 'selected' : ''}>Çalışılıyor</option>
+    <option value="Tamamlandı" ${r.status === 'Tamamlandı' ? 'selected' : ''}>Tamamlandı</option>
+  </select>
+  ${currentUser.role === 'admin' ? `<button onclick="deleteRequest(${r.id})" class="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition">Sil</button>` : ''}
+` : `<span class="text-sm font-medium">${r.status}</span>`}
+              ${currentUser.role === 'admin' ? `<button onclick="deleteRequest(${r.id})" class="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition">Sil</button>` : ''}
+            </div>
+          `;
+          requestList.appendChild(div);
+        });
+    }
+
+    function renderPendingRequests() {
+      const pendingRequests = document.getElementById('pending-requests');
+      pendingRequests.innerHTML = '';
+      const priorityOrder = { 'Yüksek': 1, 'Orta': 2, 'Düşük': 3 };
+      requests
+        .filter(r => r.assignee_id === currentUser.id && r.status === 'Yapılmadı')
+        .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
+        .filter(r => !dismissedNotifications.includes(r.id))
+        .forEach(r => {
+          const div = document.createElement('div');
+          div.className = 'p-4 rounded-lg shadow-sm bg-red-100 text-red-800';
+          div.innerHTML = `
+            <p class="font-medium">${r.title}</p>
+            <p class="text-sm">Açıklama: ${r.description}</p>
+            <p class="text-sm">Öncelik: ${r.priority}</p>
+            <p class="text-sm">Son Tarih: ${r.deadline.toLocaleDateString('tr-TR')}</p>
+          `;
+          pendingRequests.appendChild(div);
+        });
+    }
+
+    function updateRequestStatus(requestId, status) {
+      const request = requests.find(r => r.id === requestId);
+      if (request) {
+      if (currentUser.id !== request.assignee_id && currentUser.role !== 'admin') {
+        alert('Sadece talep edilen kişi veya admin durumu değiştirebilir!');
+        return;
+      }
+        request.status = status;
+        saveData();
+        renderRequests();
+        renderPendingRequests();
+        renderNotifications();
+      }
+    }
+
+    function deleteRequest(requestId) {
+      requests = requests.filter(r => r.id !== requestId);
+      saveData();
+      renderRequests();
+      renderPendingRequests();
+      renderNotifications();
+    }
+
+    function renderNotifications() {
+      const notificationList = document.getElementById('notification-list');
+      notificationList.innerHTML = '';
+      const now = new Date();
+      deadlines.filter(d => d.assignee_id === currentUser.id).forEach(d => {
+        const timeDiff = d.due_date - now;
+        if (timeDiff < 0) {
+          const div = document.createElement('div');
+          div.className = 'text-red-600 bg-red-50 p-2 rounded-lg';
+          div.textContent = `Uyarı: ${d.task} deadline geçti!`;
+          notificationList.appendChild(div);
+        } else if (timeDiff < 24 * 60 * 60 * 1000) {
+          const div = document.createElement('div');
+          div.className = 'text-orange-600 bg-orange-50 p-2 rounded-lg';
+          div.textContent = `Hatırlatma: ${d.task} deadline yarın!`;
+          notificationList.appendChild(div);
+        }
+      });
+      requests.filter(r => r.assignee_id === currentUser.id && r.status !== 'Tamamlandı' && !dismissedNotifications.includes(r.id)).filter(r => !dismissedNotifications.includes(r.id))
+        .forEach(r => {
+  const div = document.createElement('div');
+  div.className = 'text-orange-600 bg-orange-50 p-2 rounded-lg flex justify-between items-center';
+  div.innerHTML = `
+    <span>Yeni Talep: ${r.title} (${r.priority} öncelik)</span><br><span class="text-sm text-gray-500">${new Date(r.created_at).toLocaleString('tr-TR')}</span>
+    <button onclick="deleteNotification(${r.id})" class="ml-4 bg-red-500 text-white px-2 py-1 rounded">Sil</button>
+  `;
+  notificationList.appendChild(div);
+      });
+    }
+
+    function showProfile() {
+      document.getElementById('profile-screen').classList.remove('hidden');
+      document.getElementById('profile-email').value = currentUser.email || '';
+      document.getElementById('profile-firstname').value = currentUser.firstname || '';
+      document.getElementById('profile-lastname').value = currentUser.lastname || '';
+      document.getElementById('profile-age').value = currentUser.age || '';
+      document.getElementById('profile-birthdate').value = currentUser.birthdate || '';
+    }
+
+    function saveProfile() {
+      currentUser.email = document.getElementById('profile-email').value;
+      currentUser.firstname = document.getElementById('profile-firstname').value;
+      currentUser.lastname = document.getElementById('profile-lastname').value;
+      currentUser.age = document.getElementById('profile-age').value;
+      currentUser.birthdate = document.getElementById('profile-birthdate').value;
+      saveData();
+      document.getElementById('profile-screen').classList.add('hidden');
+      alert('Kişisel bilgileriniz güncellendi!');
+    }
+
+    function showForgotPassword() {
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('forgot-password-screen').classList.remove('hidden');
+    }
+
+    function hideForgotPassword() {
+      document.getElementById('forgot-password-screen').classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+    }
+
+    function resetPassword() {
+      const username = document.getElementById('forgot-username').value;
+      const user = users.find(u => u.username === username);
+      if (user && user.email) {
+        const newPassword = Math.floor(10000 + Math.random() * 90000).toString().substr(0, 5);
+        user.password = newPassword;
+        saveData();
+        alert(`Yeni şifreniz: ${newPassword}. Lütfen e-postanızı kontrol edin.`);
+        // Not: Gerçek bir e-posta gönderme için bir SMTP servisi (ör. Nodemailer) entegre edilmelidir.
+      } else {
+        alert('Kullanıcı bulunamadı veya e-posta adresi girilmemiş!');
+      }
+      hideForgotPassword();
+    }
+
+    function checkDailyTasks() {
+      const now = new Date();
+      const day = now.getDay();
+      const hour = now.getHours();
+      const minute = now.getMinutes();
+      if (day !== 0 && day !== 6 && hour === 7 && minute === 40) {
+        sendTaskEmails();
+      }
+    }
+
+    function sendTaskEmails() {
+      users.forEach(user => {
+        if (user.email) {
+          const userRequests = requests.filter(r => r.assignee_id === user.id && r.status === 'Yapılmadı');
+          if (userRequests.length > 0) {
+            const subject = 'Günlük Görev Bildirimi';
+            const body = `Merhaba ${user.firstname || user.username},\n\nAtanan görevleriniz:\n${userRequests.map(r => `- ${r.title} (Öncelik: ${r.priority}, Son Tarih: ${r.deadline.toLocaleDateString('tr-TR')})`).join('\n')}\n\nİyi çalışmalar!`;
+            // Not: Gerçek bir e-posta gönderme için bir SMTP servisi (ör. Nodemailer) entegre edilmelidir.
+            console.log(`E-posta gönderildi: ${user.email} - ${subject}\n${body}`);
+          }
+        }
+      });
+    }
+
+    
+    function deleteNotification(taskTitle) {
+      requests = requests.filter(r => !(r.assignee_id === currentUser.id && r.title === taskTitle && r.status !== 'Tamamlandı'));
+      deadlines = deadlines.filter(d => !(d.assignee_id === currentUser.id && d.task === taskTitle));
+      saveData();
+      renderNotifications();
+      renderRequests();
+      renderPendingRequests();
+    }
+
+
+    loadData();
+    renderUsers();
+    renderAssigneeOptions();
+  
+    function deleteNotification(requestId) {
+      if (!dismissedNotifications.includes(requestId)) {
+        dismissedNotifications.push(requestId);
+        localStorage.setItem('dismissedNotifications', JSON.stringify(dismissedNotifications));
+        renderNotifications();
+      }
+    }
+
+    function markAllNotificationsAsRead() {
+      const allRequestIds = requests
+        .filter(r => r.assignee_id === currentUser.id && r.status !== 'Tamamlandı')
+        .map(r => r.id);
+      dismissedNotifications = [...new Set([...dismissedNotifications, ...allRequestIds])];
+      localStorage.setItem('dismissedNotifications', JSON.stringify(dismissedNotifications));
+      renderNotifications();
+    }
+
+    function clearAllNotifications() {
+      dismissedNotifications = requests
+        .filter(r => r.assignee_id === currentUser.id && r.status !== 'Tamamlandı')
+        .map(r => r.id);
+      localStorage.setItem('dismissedNotifications', JSON.stringify(dismissedNotifications));
+      renderNotifications();
+    }
+
+
+function changePassword() {
+  const currentPass = document.getElementById('current-password').value;
+  const newPass = document.getElementById('new-password').value;
+  const confirmPass = document.getElementById('confirm-password').value;
+
+  if (currentPass !== currentUser.password) {
+    alert('Mevcut şifre hatalı!');
+    return;
+  }
+  if (newPass !== confirmPass) {
+    alert('Yeni şifreler eşleşmiyor!');
+    return;
+  }
+  if (newPass.length < 4) {
+    alert('Yeni şifre en az 4 karakter olmalı.');
+    return;
+  }
+
+  currentUser.password = newPass;
+  saveData();
+  alert('Şifreniz başarıyla güncellendi.');
+  document.getElementById('current-password').value = '';
+  document.getElementById('new-password').value = '';
+  document.getElementById('confirm-password').value = '';
+}
+
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("requestForm");
+    if (form) {
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const payload = {};
+            formData.forEach((v, k) => payload[k] = v);
+
+            await fetch("http://localhost:5000/api/requests", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            form.reset();
+            loadRequests();
+        });
+    }
+
+    async function loadRequests() {
+        const res = await fetch("http://localhost:5000/api/requests");
+        const data = await res.json();
+        const container = document.getElementById("requestList");
+        if (!container) return;
+
+        container.innerHTML = "";
+        data.forEach(req => {
+            const div = document.createElement("div");
+            div.className = "request-item";
+            div.innerHTML = `
+                <b>${req.title}</b> - ${req.status}<br>
+                <i>${req.description}</i><br>
+                <button onclick="updateStatus('${req._id}', 'Yapılıyor')">Yapılıyor</button>
+                <button onclick="updateStatus('${req._id}', 'Tamamlandı')">Tamamlandı</button>
+                <button onclick="deleteRequest('${req._id}')">Sil</button>
+                <hr>`;
+            container.appendChild(div);
+        });
+    }
+
+    window.updateStatus = async function(id, status) {
+        await fetch(`http://localhost:5000/api/requests/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status })
+        });
+        loadRequests();
+    };
+
+    window.deleteRequest = async function(id) {
+        await fetch(`http://localhost:5000/api/requests/${id}`, {
+            method: "DELETE"
+        });
+        loadRequests();
+    };
+
+    loadRequests();
+    setInterval(loadRequests, 5000);
+});
+</script>
+
+</body>
+</html>
